@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="index-style.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: lightblue;
+            }
+
+            h2 {
+                margin-bottom: 100px;
+                text-align: center;
+            }
+
+            #studentDetails {
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                width: 70%;
+                max-width: 500px;
+            }
+
+            button {
+                margin-top: 20px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+    </head>
+<body>
+
+    <h2>Student Details</h2>
+
+    <div id="studentDetails"></div>
+
+    <a href="/"><button>Back to index</button></a>
+
+
+    <script>
+
+        const getCurrentStudentId = () => {
+            const currentUrl = window.location.href;
+            const pathArray = currentUrl.split('/');
+            const studentIndex = pathArray.indexOf('student');
+
+            if (studentIndex !== -1 && pathArray.length > studentIndex + 1) {
+                const studentId = pathArray[studentIndex + 1]; //numero dopo il param "student"
+                return studentId;
+            }
+
+            return null;
+        };
+        
+        const displayStudentDetails = () => {
+            var studentDetailsContainer = document.getElementById('studentDetails');
+            var id = getCurrentStudentId();
+            var students = JSON.parse(localStorage.getItem('students')) || [];
+
+            var student = students.find(s => s.id === id);
+            if (student.id > 0) {
+                var detailsHTML = `
+                    <p><strong>Name:</strong> ${student.name}</p>
+                    <p><strong>Surname:</strong> ${student.surname}</p>
+                    <p><strong>Id:</strong> ${student.id}</p>
+                    <button onclick="editSingleStudent(${student.id})">Edit</button>
+                    <button onclick="deleteSingleStudent(${student.id})">Delete</button>
+                `;
+
+                studentDetailsContainer.innerHTML = detailsHTML;
+            } else {
+                studentDetailsContainer.innerHTML = '<p>Studente non trovato.</p>';
+            }
+        }
+
+        
+
+        //view 
+        const deleteSingleStudent = (id) => {
+            if(deleteStudent(id)){
+                alert("Student deleted successfully");
+                window.location.href = '/index.html';
+            }
+            else alert("Student not deleted");
+        }
+
+        const editSingleStudent = (id) => {
+            const name = prompt("New student name: ");
+            const surname = prompt("New student surname: ");
+
+            if(editStudent(id, name, surname)){
+                alert("Student modified successfully");
+                displayStudentDetails();
+            }
+            else alert("Error, name or surname not inserted");
+        }
+
+
+
+        //controller
+        const editStudent = (studentId, newName, newSurname) => {
+            var students = JSON.parse(localStorage.getItem('students')) || [];
+
+            var indexToEdit = students.findIndex(s => s.id == studentId);
+
+            if(indexToEdit > -1){
+                var toEdit = students[indexToEdit];
+
+                toEdit.name = newName;
+                toEdit.surname = newSurname
+
+                students.splice(indexToEdit, 1, toEdit);
+                localStorage.setItem('students', JSON.stringify(students));
+                return(true);
+            }
+            return(false);
+        }
+
+
+        const deleteStudent = (studentId) => {
+            var students = JSON.parse(localStorage.getItem('students')) || [];
+
+            var indexToDel = students.findIndex(s => s.id == studentId)
+            
+            if(indexToDel != -1){
+                students.splice(indexToDel, 1);
+                localStorage.setItem('students', JSON.stringify(students));
+                return(true);
+            }
+            return(false);
+        }
+
+    </script>
+
+
+    <script>
+        displayStudentDetails();
+    </script>
+
+
+</body>
+</html>

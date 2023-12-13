@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="index-style.css"> <!-- Link the CSS file -->
+</head>
+<body>
+
+    <h1>Student Management System</h1>
+
+    <form id="studentForm">
+        <label for="id">Student ID:</label>
+        <input type="number" id="id" required>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="surname">Surname:</label>
+        <input type="text" id="surname" required>
+
+        <button type="button" onclick="addSingleStudent()">Add Student</button>
+    </form>
+
+    <ul id="studentList"></ul>
+
+    <div id="studentDetails"></div>
+
+    <script>
+        const getStudentsList = () => {
+            var students = getStudents();
+            var studentList = document.getElementById('studentList');
+            studentList.innerHTML = '';
+
+            students.forEach(s=>{
+                var list = document.createElement("li");
+
+                list.innerHTML = `
+                    <span>${s.id} - ${s.name} ${s.surname}</span>
+                    <a href="/student/${s.id}"><button>View</button></a>
+                `;
+
+                studentList.appendChild(list);
+            });
+        }
+
+        const getSingleStudent = id => {
+            var student = getStudent(id);
+            var studentDetails = document.getElementById('studentDetails');
+
+            if(student.id > 0){
+                studentDetails.innerHTML = `
+                    <p>Name: ${student.name}</p>
+                    <p>Surname: ${student.surname}</p>
+                    <p>ID: ${student.id}</p>
+                `;
+            }
+
+            else studentDetails.innerHTML = '<span> Studente non trovato </span>';
+        }
+
+        const addSingleStudent = () => {
+            var id = document.getElementById('id').value;
+            var name = document.getElementById('name').value;
+            var surname = document.getElementById('surname').value;
+
+            document.getElementById('id').value = "";
+            document.getElementById('name').value = "";
+            document.getElementById('surname').value = "";
+
+            if(id > 0){
+                addStudent(id, name, surname) 
+                ? getStudentsList() 
+                : alert("Errore, l'id studente è zero o esiste già");
+            }
+            else alert("Errore, l'id deve essere maggiore di 0");
+        }
+
+        
+    </script>
+
+    <script>
+        const addStudent = (studentId, studentName, studentSurname) => {
+            var students = JSON.parse(localStorage.getItem('students')) || [];
+
+            if(!students.some(s => s.id === studentId) && studentId > 0){
+                var newStudent = {
+                    id: studentId,
+                    name: studentName,
+                    surname: studentSurname
+                }
+            
+                students.push(newStudent);
+                localStorage.setItem('students', JSON.stringify(students));
+                return(true);
+            }
+            return(false);
+        }
+
+
+
+        const getStudent = (studentId) => {
+            var students = JSON.parse(localStorage.getItem('students')) || [];
+            return(students.find(s => s.id === studentId));
+        }
+
+
+        const getStudents = () => {
+            return(JSON.parse(localStorage.getItem('students')) || []);
+        }
+    </script>
+
+    <script>getStudentsList();</script>
+</body>
+</html>
+
